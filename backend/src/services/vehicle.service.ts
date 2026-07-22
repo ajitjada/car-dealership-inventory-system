@@ -162,4 +162,31 @@ export class VehicleService {
 
     return vehicle;
   }
+
+  async purchaseVehicle(id: string): Promise<IVehicle> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const vehicle = await Vehicle.findById(id);
+
+    if (!vehicle) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (vehicle.quantity <= 0) {
+      const error: any = new Error("Vehicle is out of stock");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    vehicle.quantity -= 1;
+    await vehicle.save();
+
+    return vehicle;
+  }
 }
