@@ -51,4 +51,8 @@ export class VehicleService {
 
     return vehicle;
   }
+
+  async getAllVehicles(): Promise<IVehicle[]> {
+    return await Vehicle.find();
+  }
 }
