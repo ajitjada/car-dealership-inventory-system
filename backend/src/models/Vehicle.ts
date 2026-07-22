@@ -1,48 +1,60 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-export interface IVehicle {
+export interface IVehicleImage {
+  url: string;
+  publicId?: string;
+}
+
+export interface IVehicleData {
   make: string;
   model: string;
   category: string;
   price: number;
   quantity: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  year?: number;
+  images: IVehicleImage[];
 }
 
-const vehicleSchema = new Schema<IVehicle>(
+export type IVehicle = Omit<Document, "model"> & IVehicleData;
+
+const vehicleSchema: Schema = new Schema(
   {
     make: {
       type: String,
-      required: [true, "Make is required"],
+      required: true,
       trim: true,
     },
     model: {
       type: String,
-      required: [true, "Model is required"],
+      required: true,
       trim: true,
     },
     category: {
       type: String,
-      required: [true, "Category is required"],
+      required: true,
       trim: true,
     },
     price: {
       type: Number,
-      required: [true, "Price is required"],
-      min: [0.01, "Price must be greater than 0"],
+      required: true,
     },
     quantity: {
       type: Number,
-      required: [true, "Quantity is required"],
-      min: [0, "Quantity cannot be negative"],
+      required: true,
     },
+    year: {
+      type: Number,
+    },
+    images: [
+      {
+        url: { type: String, required: true },
+        publicId: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-vehicleSchema.index({ make: 1, model: 1 }, { unique: true });
-
-export const Vehicle = model<IVehicle>("Vehicle", vehicleSchema);
+export const Vehicle = mongoose.model<IVehicle>("Vehicle", vehicleSchema);

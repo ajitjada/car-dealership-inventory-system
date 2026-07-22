@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { vehicleService } from "../../services/vehicle.service";
-import { Vehicle } from "../../types/vehicle.types";
+import { VehicleImage } from "../../types/vehicle.types";
 
 export interface EditVehicleFormInputs {
   make: string;
@@ -13,10 +13,26 @@ export interface EditVehicleFormInputs {
   year?: number;
 }
 
+interface SelectedFilePreview {
+  file: File;
+  previewUrl: string;
+}
+
 export const EditVehiclePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [apiError, setApiError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Existing Cloudinary images & deletion queue
+  const [existingImages, setExistingImages] = useState<VehicleImage[]>([]);
+  const [deletedPublicIds, setDeletedPublicIds] = useState<string[]>([]);
+  const [deletedImageUrls, setDeletedImageUrls] = useState<string[]>([]);
+
+  // Newly selected files & file validation errors
+  const [newSelectedFiles, setNewSelectedFiles] = useState<SelectedFilePreview[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
+
   const navigate = useNavigate();
 
   const {
@@ -26,20 +42,22 @@ export const EditVehiclePage: React.FC = () => {
     formState: { errors, isSubmitting },
   } = useForm<EditVehicleFormInputs>();
 
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
   useEffect(() => {
     const fetchVehicleDetails = async () => {
       if (!id) return;
       setLoading(true);
       try {
-        const vehicles = await vehicleService.getVehicles();
-        const found = vehicles.find((v) => (v._id || v.id) === id);
-        if (found) {
-          setValue("make", found.make);
-          setValue("model", found.model);
-          setValue("category", found.category);
-          setValue("price", found.price);
-          setValue("quantity", found.quantity);
-          if (found.year) setValue("year", found.year);
+        const vehicle = await vehicleService.getVehicleById(id);
+        if (vehicle) {
+          setValue("make", vehicle.make);
+          setValue("model", vehicle.model);
+          setValue("category", vehicle.category);
+          setValue("price", vehicle.price);
+          setValue("quantity", vehicle.quantity);
+          if (vehicle.year) setValue("year", vehicle.year);
+          if (vehicle.images) setExistingImages(vehicle.images);
         } else {
           setApiError("Vehicle not found in database.");
         }
@@ -53,20 +71,108 @@ export const EditVehiclePage: React.FC = () => {
     fetchVehicleDetails();
   }, [id, setValue]);
 
+  const handleFiles = (files: FileList | File[]) => {
+    setFileError(null);
+    const newFilesArray = Array.from(files);
+
+    const activeExistingCount = existingImages.length;
+    const totalFutureCount = activeExistingCount + newSelectedFiles.length + newFilesArray.length;
+
+    if (totalFutureCount > 5) {
+      setFileError("Maximum 5 images allowed per vehicle.");
+      return;
+    }
+
+    const validFiles: SelectedFilePreview[] = [];
+
+    for (const file of newFilesArray) {
+      if (!allowedTypes.includes(file.type)) {
+        setFileError(`"${file.name}" is an invalid format. Only JPG, JPEG, PNG, and WEBP are allowed.`);
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setFileError(`"${file.name}" exceeds the 5 MB file size limit.`);
+        return;
+      }
+
+      validFiles.push({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      });
+    }
+
+    setNewSelectedFiles((prev) => [...prev, ...validFiles]);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      handleFiles(e.target.files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (e.dataTransfer.files) {
+      handleFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleRemoveExistingImage = (index: number) => {
+    const target = existingImages[index];
+    if (target.publicId) {
+      setDeletedPublicIds((prev) => [...prev, target.publicId!]);
+    } else if (target.url) {
+      setDeletedImageUrls((prev) => [...prev, target.url]);
+    }
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveNewFile = (index: number) => {
+    setNewSelectedFiles((prev) => {
+      const updated = [...prev];
+      URL.revokeObjectURL(updated[index].previewUrl);
+      updated.splice(index, 1);
+      return updated;
+    });
+  };
+
   const onSubmit = async (data: EditVehicleFormInputs) => {
     if (!id) return;
     setApiError(null);
     try {
-      const payload: Partial<Vehicle> = {
-        make: data.make.trim(),
-        model: data.model.trim(),
-        category: data.category.trim(),
-        price: Number(data.price),
-        quantity: Number(data.quantity),
-      };
-      if (data.year) payload.year = Number(data.year);
+      const formData = new FormData();
+      formData.append("make", data.make.trim());
+      formData.append("model", data.model.trim());
+      formData.append("category", data.category.trim());
+      formData.append("price", String(data.price));
+      formData.append("quantity", String(data.quantity));
+      if (data.year) formData.append("year", String(data.year));
 
-      await vehicleService.updateVehicle(id, payload);
+      if (deletedPublicIds.length > 0) {
+        formData.append("deletedPublicIds", JSON.stringify(deletedPublicIds));
+      }
+
+      if (deletedImageUrls.length > 0) {
+        formData.append("deletedImageUrls", JSON.stringify(deletedImageUrls));
+      }
+
+      newSelectedFiles.forEach((item) => {
+        formData.append("images", item.file);
+      });
+
+      await vehicleService.updateVehicle(id, formData);
       navigate("/dashboard");
     } catch (err: any) {
       const message =
@@ -79,20 +185,20 @@ export const EditVehiclePage: React.FC = () => {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center">
         <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-xs text-slate-500 font-bold">Loading vehicle details...</p>
+        <p className="mt-4 text-xs text-slate-500 font-bold">Loading vehicle specifications...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-6">
+    <div className="max-w-3xl mx-auto py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
             Edit Vehicle Listing
           </h1>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            Update specifications, price, or inventory count.
+            Update vehicle details, add new images, or remove existing images.
           </p>
         </div>
         <Link
@@ -111,8 +217,124 @@ export const EditVehiclePage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+          {/* Vehicle Images Management Section */}
+          <div className="space-y-4">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Vehicle Gallery & Image Management (Max 5 Total)
+            </label>
+
+            {/* Drag and Drop Zone */}
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
+                isDragOver
+                  ? "border-emerald-500 bg-emerald-50/50 scale-[1.01]"
+                  : "border-slate-300 hover:border-emerald-400 bg-slate-50/50"
+              }`}
+            >
+              <input
+                id="edit-vehicle-images-input"
+                type="file"
+                multiple
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <label
+                htmlFor="edit-vehicle-images-input"
+                className="cursor-pointer flex flex-col items-center justify-center space-y-2"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl border border-emerald-100 shadow-2xs">
+                  ➕
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800">
+                    <span className="text-emerald-600">Upload additional images</span> or drag files here
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    JPG, JPEG, PNG, WEBP (Max 5 MB per file)
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            {fileError && <p className="text-xs text-red-600 font-medium">{fileError}</p>}
+
+            {/* Gallery Previews (Existing + New Files) */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                Current Gallery ({existingImages.length + newSelectedFiles.length} of 5)
+              </span>
+
+              {existingImages.length === 0 && newSelectedFiles.length === 0 ? (
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs text-slate-400 font-medium">
+                  No images attached to this vehicle yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {/* Existing Cloudinary Images */}
+                  {existingImages.map((img, index) => (
+                    <div
+                      key={`existing-${index}`}
+                      className="relative group rounded-xl overflow-hidden border border-emerald-300 bg-slate-900 aspect-square"
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Existing ${index + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExistingImage(index)}
+                          className="bg-red-600 text-white rounded-full p-1.5 hover:bg-red-700 shadow-md text-xs cursor-pointer"
+                          title="Delete from vehicle"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <span className="absolute top-1 left-1 text-[8px] font-bold text-white bg-emerald-700 px-1 py-0.5 rounded shadow-xs">
+                        Saved
+                      </span>
+                    </div>
+                  ))}
+
+                  {/* Newly Added Files */}
+                  {newSelectedFiles.map((item, index) => (
+                    <div
+                      key={`new-${index}`}
+                      className="relative group rounded-xl overflow-hidden border border-amber-300 bg-slate-900 aspect-square"
+                    >
+                      <img
+                        src={item.previewUrl}
+                        alt={item.file.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveNewFile(index)}
+                          className="bg-red-600 text-white rounded-full p-1.5 hover:bg-red-700 shadow-md text-xs cursor-pointer"
+                          title="Remove file"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <span className="absolute top-1 left-1 text-[8px] font-bold text-slate-900 bg-amber-300 px-1 py-0.5 rounded shadow-xs">
+                        New
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Form Input Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             {/* Make */}
             <div>
               <label htmlFor="make" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -257,7 +479,7 @@ export const EditVehiclePage: React.FC = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  <span>Updating...</span>
+                  <span>Updating Listing...</span>
                 </>
               ) : (
                 <span>Update Vehicle</span>

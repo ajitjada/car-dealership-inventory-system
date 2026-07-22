@@ -7,13 +7,31 @@ const vehicleService = new VehicleService();
 export class VehicleController {
   async createVehicle(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { make, model, category, price, quantity } = req.body;
+      let { make, model, category, price, quantity, year, images } = req.body;
+
+      if (price !== undefined && price !== null) price = Number(price);
+      if (quantity !== undefined && quantity !== null) quantity = Number(quantity);
+      if (year !== undefined && year !== null && year !== "") year = Number(year);
+
+      if (typeof images === "string") {
+        try {
+          images = JSON.parse(images);
+        } catch (e) {
+          images = [];
+        }
+      }
+
+      const files = req.files as Express.Multer.File[] | undefined;
+
       const vehicle = await vehicleService.createVehicle({
         make,
         model,
         category,
         price,
         quantity,
+        year,
+        images,
+        files,
       });
 
       res.status(201).json({
@@ -37,6 +55,25 @@ export class VehicleController {
         success: true,
         message: "Vehicles retrieved successfully",
         data: vehicles,
+      });
+    } catch (error: any) {
+      const statusCode = error.statusCode || 500;
+      res.status(statusCode).json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
+    }
+  }
+
+  async getVehicleById(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const id = req.params.id as string;
+      const vehicle = await vehicleService.getVehicleById(id);
+
+      res.status(200).json({
+        success: true,
+        message: "Vehicle retrieved successfully",
+        data: vehicle,
       });
     } catch (error: any) {
       const statusCode = error.statusCode || 500;
@@ -75,7 +112,41 @@ export class VehicleController {
   async updateVehicle(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const id = req.params.id as string;
-      const updatedVehicle = await vehicleService.updateVehicle(id, req.body);
+      let { make, model, category, price, quantity, year, deletedPublicIds, deletedImageUrls } = req.body;
+
+      if (price !== undefined && price !== null && price !== "") price = Number(price);
+      if (quantity !== undefined && quantity !== null && quantity !== "") quantity = Number(quantity);
+      if (year !== undefined && year !== null && year !== "") year = Number(year);
+
+      if (typeof deletedPublicIds === "string") {
+        try {
+          deletedPublicIds = JSON.parse(deletedPublicIds);
+        } catch (e) {
+          deletedPublicIds = [deletedPublicIds];
+        }
+      }
+
+      if (typeof deletedImageUrls === "string") {
+        try {
+          deletedImageUrls = JSON.parse(deletedImageUrls);
+        } catch (e) {
+          deletedImageUrls = [deletedImageUrls];
+        }
+      }
+
+      const files = req.files as Express.Multer.File[] | undefined;
+
+      const updatedVehicle = await vehicleService.updateVehicle(id, {
+        make,
+        model,
+        category,
+        price,
+        quantity,
+        year,
+        deletedPublicIds,
+        deletedImageUrls,
+        files,
+      });
 
       res.status(200).json({
         success: true,
@@ -133,7 +204,7 @@ export class VehicleController {
     try {
       const id = req.params.id as string;
       const { quantity } = req.body;
-      const vehicle = await vehicleService.restockVehicle(id, quantity);
+      const vehicle = await vehicleService.restockVehicle(id, Number(quantity));
 
       res.status(200).json({
         success: true,

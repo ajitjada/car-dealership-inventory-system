@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { vehicleService } from "../../services/vehicle.service";
-import { Vehicle } from "../../types/vehicle.types";
 
 export interface AddVehicleFormInputs {
   make: string;
@@ -13,8 +12,16 @@ export interface AddVehicleFormInputs {
   year?: number;
 }
 
+interface SelectedFilePreview {
+  file: File;
+  previewUrl: string;
+}
+
 export const AddVehiclePage: React.FC = () => {
   const [apiError, setApiError] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFilePreview[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const {
@@ -23,19 +30,88 @@ export const AddVehiclePage: React.FC = () => {
     formState: { errors, isSubmitting },
   } = useForm<AddVehicleFormInputs>();
 
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+  const handleFiles = (files: FileList | File[]) => {
+    setFileError(null);
+    const newFilesArray = Array.from(files);
+
+    if (selectedFiles.length + newFilesArray.length > 5) {
+      setFileError("Maximum 5 images allowed per vehicle.");
+      return;
+    }
+
+    const validFiles: SelectedFilePreview[] = [];
+
+    for (const file of newFilesArray) {
+      if (!allowedTypes.includes(file.type)) {
+        setFileError(`"${file.name}" is an invalid format. Only JPG, JPEG, PNG, and WEBP are allowed.`);
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setFileError(`"${file.name}" exceeds the 5 MB file size limit.`);
+        return;
+      }
+
+      validFiles.push({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      });
+    }
+
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      handleFiles(e.target.files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (e.dataTransfer.files) {
+      handleFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prev) => {
+      const updated = [...prev];
+      URL.revokeObjectURL(updated[index].previewUrl);
+      updated.splice(index, 1);
+      return updated;
+    });
+  };
+
   const onSubmit = async (data: AddVehicleFormInputs) => {
     setApiError(null);
     try {
-      const payload: Partial<Vehicle> = {
-        make: data.make.trim(),
-        model: data.model.trim(),
-        category: data.category.trim(),
-        price: Number(data.price),
-        quantity: Number(data.quantity),
-      };
-      if (data.year) payload.year = Number(data.year);
+      const formData = new FormData();
+      formData.append("make", data.make.trim());
+      formData.append("model", data.model.trim());
+      formData.append("category", data.category.trim());
+      formData.append("price", String(data.price));
+      formData.append("quantity", String(data.quantity));
+      if (data.year) formData.append("year", String(data.year));
 
-      await vehicleService.createVehicle(payload);
+      selectedFiles.forEach((item) => {
+        formData.append("images", item.file);
+      });
+
+      await vehicleService.createVehicle(formData);
       navigate("/dashboard");
     } catch (err: any) {
       const message =
@@ -45,14 +121,14 @@ export const AddVehiclePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-6">
+    <div className="max-w-3xl mx-auto py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
             Add New Vehicle
           </h1>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            Create a new vehicle listing in the dealership inventory database.
+            Create a vehicle listing with specifications and up to 5 images.
           </p>
         </div>
         <Link
@@ -71,8 +147,85 @@ export const AddVehiclePage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+          {/* Multiple Image Upload Drag & Drop Zone */}
+          <div className="space-y-3">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Vehicle Images (Max 5 Images, up to 5 MB each)
+            </label>
+
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
+                isDragOver
+                  ? "border-emerald-500 bg-emerald-50/50 scale-[1.01]"
+                  : "border-slate-300 hover:border-emerald-400 bg-slate-50/50"
+              }`}
+            >
+              <input
+                id="vehicle-images-input"
+                type="file"
+                multiple
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <label
+                htmlFor="vehicle-images-input"
+                className="cursor-pointer flex flex-col items-center justify-center space-y-2"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl border border-emerald-100 shadow-2xs">
+                  📁
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800">
+                    <span className="text-emerald-600">Click to upload</span> or drag and drop images here
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    Supported: JPG, JPEG, PNG, WEBP (Max 5 MB per file)
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            {fileError && <p className="text-xs text-red-600 font-medium">{fileError}</p>}
+
+            {/* Selected File Previews */}
+            {selectedFiles.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">
+                {selectedFiles.map((item, index) => (
+                  <div
+                    key={index}
+                    className="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-900 aspect-square"
+                  >
+                    <img
+                      src={item.previewUrl}
+                      alt={item.file.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(index)}
+                        className="bg-red-600 text-white rounded-full p-1.5 hover:bg-red-700 shadow-md text-xs cursor-pointer"
+                        title="Remove image"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <span className="absolute bottom-1 left-1 right-1 text-[9px] font-bold text-white bg-black/60 px-1 py-0.5 rounded truncate">
+                      {item.file.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Form Input Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             {/* Make */}
             <div>
               <label htmlFor="make" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -217,7 +370,7 @@ export const AddVehiclePage: React.FC = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  <span>Creating Vehicle...</span>
+                  <span>Saving Vehicle & Images...</span>
                 </>
               ) : (
                 <span>Save Vehicle Listing</span>

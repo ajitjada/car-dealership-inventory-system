@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-import { Vehicle, IVehicle } from "../models/Vehicle";
+import { Vehicle, IVehicle, IVehicleImage } from "../models/Vehicle";
 import { Purchase } from "../models/Purchase";
+import { uploadToCloudinary, deleteFromCloudinary } from "../config/cloudinary";
 
 export interface CreateVehicleData {
   make?: string;
@@ -8,6 +9,9 @@ export interface CreateVehicleData {
   category?: string;
   price?: number;
   quantity?: number;
+  year?: number;
+  images?: IVehicleImage[];
+  files?: Express.Multer.File[];
 }
 
 export interface VehicleSearchQuery {
@@ -24,14 +28,29 @@ export interface UpdateVehicleData {
   category?: string;
   price?: number;
   quantity?: number;
+  year?: number;
+  images?: IVehicleImage[];
+  deletedPublicIds?: string[];
+  deletedImageUrls?: string[];
+  files?: Express.Multer.File[];
 }
 
 export class VehicleService {
   async createVehicle(data: CreateVehicleData): Promise<IVehicle> {
-    const { make, model, category, price, quantity } = data;
+    const { make, model, category, price, quantity, year } = data;
 
-    if (!make || !model || !category || price === undefined || price === null || quantity === undefined || quantity === null) {
-      const error: any = new Error("All fields (make, model, category, price, quantity) are required");
+    if (
+      !make ||
+      !model ||
+      !category ||
+      price === undefined ||
+      price === null ||
+      quantity === undefined ||
+      quantity === null
+    ) {
+      const error: any = new Error(
+        "All fields (make, model, category, price, quantity) are required"
+      );
       error.statusCode = 400;
       throw error;
     }
@@ -54,9 +73,32 @@ export class VehicleService {
     });
 
     if (existingVehicle) {
-      const error: any = new Error("A vehicle with this make and model already exists");
+      const error: any = new Error(
+        "A vehicle with this make and model already exists"
+      );
       error.statusCode = 409;
       throw error;
+    }
+
+    const uploadedImages: IVehicleImage[] = [];
+
+    // Handle JSON passed images if any
+    if (data.images && Array.isArray(data.images)) {
+      uploadedImages.push(...data.images);
+    }
+
+    // Handle Multer uploaded files
+    if (data.files && Array.isArray(data.files) && data.files.length > 0) {
+      if (uploadedImages.length + data.files.length > 5) {
+        const error: any = new Error("Maximum 5 images allowed per vehicle");
+        error.statusCode = 400;
+        throw error;
+      }
+
+      for (const file of data.files) {
+        const result = await uploadToCloudinary(file.buffer, file.mimetype);
+        uploadedImages.push(result);
+      }
     }
 
     const vehicle = await Vehicle.create({
@@ -65,6 +107,8 @@ export class VehicleService {
       category,
       price,
       quantity,
+      year: year ? Number(year) : undefined,
+      images: uploadedImages,
     });
 
     return vehicle;
@@ -72,6 +116,24 @@ export class VehicleService {
 
   async getAllVehicles(): Promise<IVehicle[]> {
     return await Vehicle.find();
+  }
+
+  async getVehicleById(id: string): Promise<IVehicle> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const vehicle = await Vehicle.findById(id);
+
+    if (!vehicle) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return vehicle;
   }
 
   async searchVehicles(query: VehicleSearchQuery): Promise<IVehicle[]> {
@@ -103,9 +165,34 @@ export class VehicleService {
   }
 
   async updateVehicle(id: string, data: UpdateVehicleData): Promise<IVehicle> {
-    if (!data || Object.keys(data).length === 0) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const hasData =
+      data.make !== undefined ||
+      data.model !== undefined ||
+      data.category !== undefined ||
+      data.price !== undefined ||
+      data.quantity !== undefined ||
+      data.year !== undefined ||
+      (data.deletedPublicIds && data.deletedPublicIds.length > 0) ||
+      (data.deletedImageUrls && data.deletedImageUrls.length > 0) ||
+      (data.files && data.files.length > 0);
+
+    if (!hasData) {
       const error: any = new Error("Request body cannot be empty");
       error.statusCode = 400;
+      throw error;
+    }
+
+    const vehicle = await Vehicle.findById(id);
+
+    if (!vehicle) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
       throw error;
     }
 
@@ -115,6 +202,7 @@ export class VehicleService {
         error.statusCode = 400;
         throw error;
       }
+      vehicle.price = data.price;
     }
 
     if (data.quantity !== undefined) {
@@ -123,27 +211,48 @@ export class VehicleService {
         error.statusCode = 400;
         throw error;
       }
+      vehicle.quantity = data.quantity;
     }
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      const error: any = new Error("Vehicle not found");
-      error.statusCode = 404;
-      throw error;
+    if (data.make !== undefined) vehicle.make = data.make;
+    if (data.model !== undefined) (vehicle as any).model = data.model;
+    if (data.category !== undefined) vehicle.category = data.category;
+    if (data.year !== undefined) vehicle.year = data.year ? Number(data.year) : undefined;
+
+    // Delete selected existing images from Cloudinary & array
+    if (data.deletedPublicIds && Array.isArray(data.deletedPublicIds) && data.deletedPublicIds.length > 0) {
+      for (const publicId of data.deletedPublicIds) {
+        await deleteFromCloudinary(publicId);
+        vehicle.images = vehicle.images.filter((img) => img.publicId !== publicId);
+      }
     }
 
-    const updatedVehicle = await Vehicle.findByIdAndUpdate(
-      id,
-      { $set: data },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedVehicle) {
-      const error: any = new Error("Vehicle not found");
-      error.statusCode = 404;
-      throw error;
+    if (data.deletedImageUrls && Array.isArray(data.deletedImageUrls) && data.deletedImageUrls.length > 0) {
+      for (const url of data.deletedImageUrls) {
+        const targetImg = vehicle.images.find((img) => img.url === url);
+        if (targetImg && targetImg.publicId) {
+          await deleteFromCloudinary(targetImg.publicId);
+        }
+        vehicle.images = vehicle.images.filter((img) => img.url !== url);
+      }
     }
 
-    return updatedVehicle;
+    // Upload new files
+    if (data.files && Array.isArray(data.files) && data.files.length > 0) {
+      if (vehicle.images.length + data.files.length > 5) {
+        const error: any = new Error("Maximum 5 images allowed per vehicle");
+        error.statusCode = 400;
+        throw error;
+      }
+
+      for (const file of data.files) {
+        const result = await uploadToCloudinary(file.buffer, file.mimetype);
+        vehicle.images.push(result);
+      }
+    }
+
+    await vehicle.save();
+    return vehicle;
   }
 
   async deleteVehicle(id: string): Promise<IVehicle> {
@@ -153,7 +262,7 @@ export class VehicleService {
       throw error;
     }
 
-    const vehicle = await Vehicle.findByIdAndDelete(id);
+    const vehicle = await Vehicle.findById(id);
 
     if (!vehicle) {
       const error: any = new Error("Vehicle not found");
@@ -161,6 +270,16 @@ export class VehicleService {
       throw error;
     }
 
+    // Clean up images from Cloudinary
+    if (vehicle.images && vehicle.images.length > 0) {
+      for (const img of vehicle.images) {
+        if (img.publicId) {
+          await deleteFromCloudinary(img.publicId);
+        }
+      }
+    }
+
+    await Vehicle.findByIdAndDelete(id);
     return vehicle;
   }
 
