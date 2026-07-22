@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/auth.service";
+import { AuthenticatedRequest } from "../middleware/auth.middleware";
 
 const authService = new AuthService();
 
@@ -40,6 +41,21 @@ export class AuthController {
       res.status(statusCode).json({
         success: false,
         message: error.message || "Internal server error",
+      });
+    }
+  }
+
+  async getProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      res.status(200).json({
+        success: true,
+        message: "Profile retrieved successfully",
+        data: req.user,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
       });
     }
   }
