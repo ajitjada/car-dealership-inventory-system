@@ -6,6 +6,7 @@ import { RegisterPage } from "../pages/auth/RegisterPage";
 import { DashboardPage } from "../pages/dashboard/DashboardPage";
 import { AddVehiclePage } from "../pages/admin/AddVehiclePage";
 import { EditVehiclePage } from "../pages/admin/EditVehiclePage";
+import { NotFoundPage } from "../pages/NotFoundPage";
 import { ProtectedRoute, GuestRoute, AdminRoute } from "../components/common/ProtectedRoute";
 
 export const AppRoutes: React.FC = () => {
@@ -33,8 +34,8 @@ export const AppRoutes: React.FC = () => {
             <Route path="admin/vehicles/edit/:id" element={<EditVehiclePage />} />
           </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* 404 Page Fallback */}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

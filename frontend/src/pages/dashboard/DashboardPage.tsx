@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { vehicleService } from "../../services/vehicle.service";
 import { Vehicle, VehicleSearchFilters } from "../../types/vehicle.types";
 import { VehicleGrid } from "../../components/common/VehicleGrid";
+import { VehicleSkeleton } from "../../components/common/VehicleSkeleton";
 import { SearchBar } from "../../components/common/SearchBar";
 import { FilterPanel } from "../../components/common/FilterPanel";
 import { DeleteVehicleDialog } from "../../components/common/DeleteVehicleDialog";
@@ -129,7 +130,7 @@ export const DashboardPage: React.FC = () => {
       const message =
         err.response?.data?.message || err.message || "Failed to delete vehicle";
       setToast({ message, type: "error" });
-    } fontally: {
+    } finally {
       setIsDeleting(false);
     }
   };
@@ -189,6 +190,7 @@ export const DashboardPage: React.FC = () => {
       {/* Toast Notification Banner */}
       {toast && (
         <div
+          role="alert"
           className={`p-4 rounded-xl shadow-md border flex items-center justify-between transition-all ${
             toast.type === "success"
               ? "bg-emerald-50 border-emerald-200 text-emerald-800"
@@ -201,6 +203,7 @@ export const DashboardPage: React.FC = () => {
           </div>
           <button
             onClick={() => setToast(null)}
+            aria-label="Dismiss notification"
             className="text-xs font-bold text-gray-500 hover:text-gray-800 p-1 cursor-pointer"
           >
             ✕
@@ -231,7 +234,7 @@ export const DashboardPage: React.FC = () => {
           {isAdmin && (
             <Link
               to="/admin/vehicles/new"
-              className="w-full sm:w-auto px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center space-x-1 cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center space-x-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-300"
             >
               <span>➕ Add New Vehicle</span>
             </Link>
@@ -269,17 +272,12 @@ export const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Loading Spinner State */}
-        {loading && (
-          <div className="min-h-[300px] flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-            <p className="mt-4 text-sm font-medium text-gray-500">Updating inventory...</p>
-          </div>
-        )}
+        {/* Loading Skeleton State */}
+        {loading && <VehicleSkeleton />}
 
         {/* Error Alert State */}
         {!loading && error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-xl shadow-sm">
+          <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-6 rounded-xl shadow-sm">
             <div className="flex items-start">
               <div className="flex-shrink-0 text-red-500 text-xl">⚠️</div>
               <div className="ml-3 flex-1">

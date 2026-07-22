@@ -1,10 +1,24 @@
-import React from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { authService } from "../../services/auth.service";
+import { User } from "../../types/auth.types";
 
 export const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const user = authService.getCurrentUser();
+  const location = useLocation();
+  const [user, setUser] = useState<User | null>(() => authService.getCurrentUser());
+
+  useEffect(() => {
+    setUser(authService.getCurrentUser());
+  }, [location]);
+
+  useEffect(() => {
+    const handleAuthChange = () => {
+      setUser(authService.getCurrentUser());
+    };
+    window.addEventListener("auth-change", handleAuthChange);
+    return () => window.removeEventListener("auth-change", handleAuthChange);
+  }, []);
 
   const handleLogout = () => {
     authService.clearAuthSession();

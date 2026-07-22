@@ -15,11 +15,17 @@ export const authService = {
   setAuthSession(token: string, user: User): void {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("auth-change"));
+    }
   },
 
   clearAuthSession(): void {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("auth-change"));
+    }
   },
 
   getCurrentUser(): User | null {
