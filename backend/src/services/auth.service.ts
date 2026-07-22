@@ -9,6 +9,11 @@ export interface RegisterUserData {
   role?: string;
 }
 
+export interface LoginUserData {
+  email: string;
+  password: string;
+}
+
 export interface AuthResult {
   user: {
     id: string;
@@ -45,6 +50,47 @@ export class AuthService {
       password: hashedPassword,
       role: role || "customer",
     });
+
+    const jwtSecret = process.env.JWT_SECRET || "defaultsecretkey";
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      jwtSecret,
+      { expiresIn: "1d" }
+    );
+
+    return {
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role || "customer",
+      },
+      token,
+    };
+  }
+
+  async login(data: LoginUserData): Promise<AuthResult> {
+    const { email, password } = data;
+
+    if (!email || !password) {
+      const error: any = new Error("Email and password are required");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      const error: any = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password || "");
+    if (!isMatch) {
+      const error: any = new Error("Invalid password");
+      error.statusCode = 401;
+      throw error;
+    }
 
     const jwtSecret = process.env.JWT_SECRET || "defaultsecretkey";
     const token = jwt.sign(

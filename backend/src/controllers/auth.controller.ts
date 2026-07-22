@@ -23,4 +23,24 @@ export class AuthController {
       });
     }
   }
+
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      const result = await authService.login({ email, password });
+
+      res.status(200).json({
+        success: true,
+        message: "Login successful",
+        data: result.user,
+        token: result.token,
+      });
+    } catch (error: any) {
+      const statusCode = error.statusCode || 500;
+      res.status(statusCode).json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
+    }
+  }
 }
