@@ -189,4 +189,31 @@ export class VehicleService {
 
     return vehicle;
   }
+
+  async restockVehicle(id: string, quantityToAdd: number): Promise<IVehicle> {
+    if (typeof quantityToAdd !== "number" || isNaN(quantityToAdd) || quantityToAdd <= 0) {
+      const error: any = new Error("Restock quantity must be a number greater than 0");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const vehicle = await Vehicle.findById(id);
+
+    if (!vehicle) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    vehicle.quantity += quantityToAdd;
+    await vehicle.save();
+
+    return vehicle;
+  }
 }
