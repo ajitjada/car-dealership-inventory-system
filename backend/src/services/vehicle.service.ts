@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Vehicle, IVehicle } from "../models/Vehicle";
 
 export interface CreateVehicleData {
@@ -14,6 +15,14 @@ export interface VehicleSearchQuery {
   category?: string;
   minPrice?: string | number;
   maxPrice?: string | number;
+}
+
+export interface UpdateVehicleData {
+  make?: string;
+  model?: string;
+  category?: string;
+  price?: number;
+  quantity?: number;
 }
 
 export class VehicleService {
@@ -90,5 +99,49 @@ export class VehicleService {
     }
 
     return await Vehicle.find(filter);
+  }
+
+  async updateVehicle(id: string, data: UpdateVehicleData): Promise<IVehicle> {
+    if (!data || Object.keys(data).length === 0) {
+      const error: any = new Error("Request body cannot be empty");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (data.price !== undefined) {
+      if (typeof data.price !== "number" || isNaN(data.price) || data.price <= 0) {
+        const error: any = new Error("Price must be a number greater than 0");
+        error.statusCode = 400;
+        throw error;
+      }
+    }
+
+    if (data.quantity !== undefined) {
+      if (typeof data.quantity !== "number" || isNaN(data.quantity) || data.quantity < 0) {
+        const error: any = new Error("Quantity must be a non-negative number");
+        error.statusCode = 400;
+        throw error;
+      }
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const updatedVehicle = await Vehicle.findByIdAndUpdate(
+      id,
+      { $set: data },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedVehicle) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return updatedVehicle;
   }
 }

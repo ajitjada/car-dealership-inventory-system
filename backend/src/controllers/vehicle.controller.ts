@@ -71,4 +71,23 @@ export class VehicleController {
       });
     }
   }
+
+  async updateVehicle(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const id = req.params.id as string;
+      const updatedVehicle = await vehicleService.updateVehicle(id, req.body);
+
+      res.status(200).json({
+        success: true,
+        message: "Vehicle updated successfully",
+        data: updatedVehicle,
+      });
+    } catch (error: any) {
+      const statusCode = error.statusCode || 500;
+      res.status(statusCode).json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
+    }
+  }
 }
