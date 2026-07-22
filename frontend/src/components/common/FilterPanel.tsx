@@ -20,15 +20,15 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   const hasActiveFilters = category !== "" || minPrice !== "" || maxPrice !== "";
 
   return (
-    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+    <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+        <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
           <span>⚙️</span> Filter & Refine
         </span>
         {hasActiveFilters && (
           <button
             onClick={onReset}
-            className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded transition-colors cursor-pointer"
+            className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1 rounded-lg border border-emerald-200 transition-colors cursor-pointer"
           >
             Clear Filters
           </button>
@@ -38,14 +38,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Category Filter */}
         <div>
-          <label htmlFor="category-select" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+          <label htmlFor="category-select" className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Category
           </label>
           <select
             id="category-select"
             value={category}
             onChange={(e) => onChange({ category: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+            className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white shadow-2xs"
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
@@ -58,7 +58,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
         {/* Min Price Filter */}
         <div>
-          <label htmlFor="min-price" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+          <label htmlFor="min-price" className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Min Price ($)
           </label>
           <input
@@ -68,13 +68,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             value={minPrice}
             onChange={(e) => onChange({ minPrice: e.target.value })}
             placeholder="Min $"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs"
           />
         </div>
 
         {/* Max Price Filter */}
         <div>
-          <label htmlFor="max-price" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+          <label htmlFor="max-price" className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Max Price ($)
           </label>
           <input
@@ -84,7 +84,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             value={maxPrice}
             onChange={(e) => onChange({ maxPrice: e.target.value })}
             placeholder="Max $"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs"
           />
         </div>
       </div>

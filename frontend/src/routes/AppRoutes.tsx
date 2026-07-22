@@ -6,6 +6,8 @@ import { RegisterPage } from "../pages/auth/RegisterPage";
 import { DashboardPage } from "../pages/dashboard/DashboardPage";
 import { AddVehiclePage } from "../pages/admin/AddVehiclePage";
 import { EditVehiclePage } from "../pages/admin/EditVehiclePage";
+import { MyPurchasesPage } from "../pages/purchases/MyPurchasesPage";
+import { AdminPurchasesPage } from "../pages/admin/AdminPurchasesPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { ProtectedRoute, GuestRoute, AdminRoute } from "../components/common/ProtectedRoute";
 
@@ -26,12 +28,14 @@ export const AppRoutes: React.FC = () => {
           {/* Protected User Routes (Accessible when logged in) */}
           <Route element={<ProtectedRoute />}>
             <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="my-purchases" element={<MyPurchasesPage />} />
           </Route>
 
           {/* Protected Admin Routes (Accessible ONLY when user.role === 'admin') */}
           <Route element={<AdminRoute />}>
             <Route path="admin/vehicles/new" element={<AddVehiclePage />} />
             <Route path="admin/vehicles/edit/:id" element={<EditVehiclePage />} />
+            <Route path="admin/purchases" element={<AdminPurchasesPage />} />
           </Route>
 
           {/* 404 Page Fallback */}

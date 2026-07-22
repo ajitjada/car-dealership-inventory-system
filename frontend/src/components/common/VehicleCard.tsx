@@ -31,18 +31,18 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
   const isOutOfStock = vehicle.quantity <= 0;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col justify-between group">
-      {/* Header / Category & Admin Action Badges */}
+    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group hover:-translate-y-1">
+      {/* Header / Category & Admin Badges */}
       <div className="p-5 pb-4">
         <div className="flex justify-between items-start mb-3">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 uppercase tracking-wider">
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase tracking-wider">
             {vehicle.category}
           </span>
           <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+            className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${
               isOutOfStock
                 ? "bg-red-50 text-red-600 border-red-100"
-                : "bg-emerald-50 text-emerald-600 border-emerald-100"
+                : "bg-emerald-50 text-emerald-700 border-emerald-200"
             }`}
           >
             {isOutOfStock ? "Out of Stock" : `${vehicle.quantity} In Stock`}
@@ -50,44 +50,44 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
         </div>
 
         {/* Make & Model Title */}
-        <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+        <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">
           {vehicle.make} {vehicle.model}
         </h3>
         {vehicle.year && (
-          <p className="text-xs text-gray-400 font-medium mt-1">Year: {vehicle.year}</p>
+          <p className="text-xs text-slate-400 font-semibold mt-1">Year: {vehicle.year}</p>
         )}
       </div>
 
       {/* Footer / Price & Action Controls */}
-      <div className="px-5 py-4 bg-gray-50 border-t border-gray-100 space-y-3">
+      <div className="px-5 py-4 bg-slate-50/80 border-t border-slate-100 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs text-gray-500 uppercase tracking-wider block">Price</span>
-            <span className="text-xl font-extrabold text-gray-900">{formattedPrice}</span>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Price</span>
+            <span className="text-xl font-black text-slate-900">{formattedPrice}</span>
           </div>
-          <div className="w-9 h-9 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-colors">
+          <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-400 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition-all">
             🚗
           </div>
         </div>
 
         {/* Admin Management Toolbar */}
         {isAdmin && (
-          <div className="pt-2 border-t border-gray-200/60 grid grid-cols-3 gap-2">
+          <div className="pt-2 border-t border-slate-200/60 grid grid-cols-3 gap-2">
             <Link
               to={`/admin/vehicles/edit/${vehicleId}`}
-              className="py-1.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 rounded-lg text-xs font-semibold text-center transition-colors"
+              className="py-1.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 rounded-xl text-xs font-bold text-center transition-colors"
             >
               ✏️ Edit
             </Link>
             <button
               onClick={() => onRestock && onRestock(vehicle)}
-              className="py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              className="py-1.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               📦 Restock
             </button>
             <button
               onClick={() => onDelete && onDelete(vehicle)}
-              className="py-1.5 px-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/80 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              className="py-1.5 px-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/80 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               🗑️ Delete
             </button>
@@ -99,12 +99,12 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           <button
             onClick={() => vehicleId && onPurchase(vehicleId)}
             disabled={isOutOfStock || isPurchasing}
-            className={`w-full py-2.5 px-4 rounded-xl font-semibold text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer ${
+            className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer ${
               isOutOfStock
-                ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
                 : isPurchasing
-                ? "bg-indigo-400 text-white cursor-wait"
-                : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.99] shadow-sm hover:shadow"
+                ? "bg-emerald-400 text-white cursor-wait"
+                : "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99] shadow-md hover:shadow-lg focus:ring-2 focus:ring-emerald-500"
             }`}
           >
             {isPurchasing ? (

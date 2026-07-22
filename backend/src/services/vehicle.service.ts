@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Vehicle, IVehicle } from "../models/Vehicle";
+import { Purchase } from "../models/Purchase";
 
 export interface CreateVehicleData {
   make?: string;
@@ -163,7 +164,7 @@ export class VehicleService {
     return vehicle;
   }
 
-  async purchaseVehicle(id: string): Promise<IVehicle> {
+  async purchaseVehicle(id: string, userId?: string): Promise<IVehicle> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       const error: any = new Error("Vehicle not found");
       error.statusCode = 404;
@@ -186,6 +187,18 @@ export class VehicleService {
 
     vehicle.quantity -= 1;
     await vehicle.save();
+
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      await Purchase.create({
+        user: new mongoose.Types.ObjectId(userId),
+        vehicle: vehicle._id,
+        quantity: 1,
+        purchasePrice: vehicle.price,
+        totalAmount: vehicle.price * 1,
+        status: "Purchased",
+        purchasedAt: new Date(),
+      });
+    }
 
     return vehicle;
   }

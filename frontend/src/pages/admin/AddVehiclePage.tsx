@@ -48,26 +48,26 @@ export const AddVehiclePage: React.FC = () => {
     <div className="max-w-2xl mx-auto py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
             Add New Vehicle
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-slate-500 font-medium mt-1">
             Create a new vehicle listing in the dealership inventory database.
           </p>
         </div>
         <Link
           to="/dashboard"
-          className="text-xs font-semibold text-gray-600 hover:text-indigo-600 bg-white border border-gray-200 px-3 py-2 rounded-xl shadow-sm transition-colors"
+          className="text-xs font-bold text-slate-700 hover:text-emerald-600 bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-xs transition-colors"
         >
           ← Back to Dashboard
         </Link>
       </div>
 
-      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-6">
+      <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100/80 space-y-6">
         {apiError && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg flex items-start space-x-3">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl flex items-start space-x-3">
             <span className="text-red-500 text-lg">⚠️</span>
-            <p className="text-sm font-medium text-red-700">{apiError}</p>
+            <p className="text-xs font-semibold text-red-800">{apiError}</p>
           </div>
         )}
 
@@ -75,7 +75,7 @@ export const AddVehiclePage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Make */}
             <div>
-              <label htmlFor="make" className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              <label htmlFor="make" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Make *
               </label>
               <input
@@ -84,15 +84,15 @@ export const AddVehiclePage: React.FC = () => {
                 placeholder="e.g., Toyota"
                 {...register("make", { required: "Vehicle make is required" })}
                 className={`w-full px-3 py-2.5 border ${
-                  errors.make ? "border-red-500" : "border-gray-300"
-                } rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  errors.make ? "border-red-500" : "border-slate-300"
+                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
               />
-              {errors.make && <p className="text-xs text-red-600 mt-1">{errors.make.message}</p>}
+              {errors.make && <p className="text-xs text-red-600 mt-1 font-medium">{errors.make.message}</p>}
             </div>
 
             {/* Model */}
             <div>
-              <label htmlFor="model" className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              <label htmlFor="model" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Model *
               </label>
               <input
@@ -101,23 +101,23 @@ export const AddVehiclePage: React.FC = () => {
                 placeholder="e.g., Camry"
                 {...register("model", { required: "Vehicle model is required" })}
                 className={`w-full px-3 py-2.5 border ${
-                  errors.model ? "border-red-500" : "border-gray-300"
-                } rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  errors.model ? "border-red-500" : "border-slate-300"
+                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
               />
-              {errors.model && <p className="text-xs text-red-600 mt-1">{errors.model.message}</p>}
+              {errors.model && <p className="text-xs text-red-600 mt-1 font-medium">{errors.model.message}</p>}
             </div>
 
             {/* Category */}
             <div>
-              <label htmlFor="category" className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              <label htmlFor="category" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Category *
               </label>
               <select
                 id="category"
                 {...register("category", { required: "Category is required" })}
                 className={`w-full px-3 py-2.5 border ${
-                  errors.category ? "border-red-500" : "border-gray-300"
-                } rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white`}
+                  errors.category ? "border-red-500" : "border-slate-300"
+                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white shadow-2xs`}
               >
                 <option value="">Select Category</option>
                 <option value="Sedan">Sedan</option>
@@ -127,12 +127,12 @@ export const AddVehiclePage: React.FC = () => {
                 <option value="Convertible">Convertible</option>
                 <option value="Hatchback">Hatchback</option>
               </select>
-              {errors.category && <p className="text-xs text-red-600 mt-1">{errors.category.message}</p>}
+              {errors.category && <p className="text-xs text-red-600 mt-1 font-medium">{errors.category.message}</p>}
             </div>
 
             {/* Year */}
             <div>
-              <label htmlFor="year" className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              <label htmlFor="year" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Year (Optional)
               </label>
               <input
@@ -142,14 +142,14 @@ export const AddVehiclePage: React.FC = () => {
                 {...register("year", {
                   min: { value: 1900, message: "Year must be valid" },
                 })}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs"
               />
-              {errors.year && <p className="text-xs text-red-600 mt-1">{errors.year.message}</p>}
+              {errors.year && <p className="text-xs text-red-600 mt-1 font-medium">{errors.year.message}</p>}
             </div>
 
             {/* Price */}
             <div>
-              <label htmlFor="price" className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              <label htmlFor="price" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Price ($) *
               </label>
               <input
@@ -162,15 +162,15 @@ export const AddVehiclePage: React.FC = () => {
                   min: { value: 1, message: "Price must be greater than 0" },
                 })}
                 className={`w-full px-3 py-2.5 border ${
-                  errors.price ? "border-red-500" : "border-gray-300"
-                } rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  errors.price ? "border-red-500" : "border-slate-300"
+                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
               />
-              {errors.price && <p className="text-xs text-red-600 mt-1">{errors.price.message}</p>}
+              {errors.price && <p className="text-xs text-red-600 mt-1 font-medium">{errors.price.message}</p>}
             </div>
 
             {/* Quantity */}
             <div>
-              <label htmlFor="quantity" className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+              <label htmlFor="quantity" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Quantity *
               </label>
               <input
@@ -182,10 +182,10 @@ export const AddVehiclePage: React.FC = () => {
                   min: { value: 0, message: "Quantity cannot be negative" },
                 })}
                 className={`w-full px-3 py-2.5 border ${
-                  errors.quantity ? "border-red-500" : "border-gray-300"
-                } rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  errors.quantity ? "border-red-500" : "border-slate-300"
+                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
               />
-              {errors.quantity && <p className="text-xs text-red-600 mt-1">{errors.quantity.message}</p>}
+              {errors.quantity && <p className="text-xs text-red-600 mt-1 font-medium">{errors.quantity.message}</p>}
             </div>
           </div>
 
@@ -193,12 +193,12 @@ export const AddVehiclePage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center space-x-2 disabled:opacity-50 cursor-pointer"
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center space-x-2 disabled:opacity-50 cursor-pointer focus:ring-2 focus:ring-emerald-500"
             >
               {isSubmitting ? (
                 <>
                   <svg
-                    className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"

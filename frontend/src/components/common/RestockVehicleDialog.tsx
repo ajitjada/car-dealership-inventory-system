@@ -33,16 +33,16 @@ export const RestockVehicleDialog: React.FC<RestockVehicleDialogProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in zoom-in duration-150">
-        <div className="flex items-center space-x-3 text-indigo-600">
-          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-xl">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in duration-150">
+        <div className="flex items-center space-x-3 text-emerald-600">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-xl">
             📦
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Restock Vehicle</h3>
-            <p className="text-xs text-gray-500">
+            <h3 className="text-lg font-black text-slate-900">Restock Vehicle</h3>
+            <p className="text-xs text-slate-500 font-medium">
               Current stock:{" "}
-              <strong className="text-indigo-600">{vehicle.quantity}</strong> units
+              <strong className="text-emerald-600 font-bold">{vehicle.quantity}</strong> units
             </p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export const RestockVehicleDialog: React.FC<RestockVehicleDialogProps> = ({
           <div>
             <label
               htmlFor="restock-quantity"
-              className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1"
+              className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5"
             >
               Quantity to Add
             </label>
@@ -65,24 +65,24 @@ export const RestockVehicleDialog: React.FC<RestockVehicleDialogProps> = ({
                 setError(null);
               }}
               placeholder="e.g., 5, 10, 20"
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs"
             />
-            {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+            {error && <p className="text-xs text-red-600 mt-1 font-medium">{error}</p>}
           </div>
 
-          <div className="flex items-center justify-end space-x-3 pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
               disabled={isRestocking}
-              className="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isRestocking}
-              className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-colors flex items-center space-x-2 cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-50 focus:ring-2 focus:ring-emerald-500"
             >
               {isRestocking ? (
                 <>

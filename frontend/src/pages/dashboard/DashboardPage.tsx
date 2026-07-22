@@ -191,40 +191,39 @@ export const DashboardPage: React.FC = () => {
       {toast && (
         <div
           role="alert"
-          className={`p-4 rounded-xl shadow-md border flex items-center justify-between transition-all ${
-            toast.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : "bg-red-50 border-red-200 text-red-800"
-          }`}
+          className={`p-4 rounded-2xl shadow-md border flex items-center justify-between transition-all ${toast.type === "success"
+            ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+            : "bg-red-50 border-red-200 text-red-900"
+            }`}
         >
           <div className="flex items-center space-x-3">
             <span className="text-xl">{toast.type === "success" ? "🎉" : "⚠️"}</span>
-            <span className="text-sm font-semibold">{toast.message}</span>
+            <span className="text-xs font-bold">{toast.message}</span>
           </div>
           <button
             onClick={() => setToast(null)}
             aria-label="Dismiss notification"
-            className="text-xs font-bold text-gray-500 hover:text-gray-800 p-1 cursor-pointer"
+            className="text-xs font-bold text-slate-500 hover:text-slate-800 p-1 cursor-pointer"
           >
             ✕
           </button>
         </div>
       )}
 
-      {/* Welcome Hero Banner */}
-      <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Welcome Hero Banner - Emerald Green Gradient */}
+      <div className="bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div>
           <div className="flex items-center space-x-3 mb-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Welcome back, {user?.name || user?.email || "User"}!
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+              Welcome back, {user?.name || user?.email || "User"}
             </h1>
             {isAdmin && (
-              <span className="text-xs font-extrabold px-2.5 py-1 rounded bg-amber-400 text-amber-950 uppercase tracking-wider shadow-xs">
+              <span className="text-[10px] font-black px-2.5 py-1 rounded-md bg-emerald-300 text-emerald-950 uppercase tracking-widest shadow-xs">
                 ADMIN ACCESS
               </span>
             )}
           </div>
-          <p className="mt-2 text-indigo-100 text-sm sm:text-base max-w-xl">
+          <p className="mt-2 text-emerald-100 text-xs sm:text-sm max-w-xl font-medium leading-relaxed">
             {isAdmin
               ? "Manage dealership inventory, add new listings, edit specifications, and restock vehicle inventory."
               : "Browse available inventory, purchase vehicles, and check real-time stock levels."}
@@ -234,14 +233,14 @@ export const DashboardPage: React.FC = () => {
           {isAdmin && (
             <Link
               to="/admin/vehicles/new"
-              className="w-full sm:w-auto px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center space-x-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-300"
+              className="w-full sm:w-auto px-5 py-3 bg-emerald-300 hover:bg-emerald-200 text-emerald-950 font-black text-xs rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-200"
             >
               <span>➕ Add New Vehicle</span>
             </Link>
           )}
-          <div className="flex-shrink-0 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-center sm:text-right">
-            <span className="text-xs uppercase text-indigo-200 tracking-wider block">Available Vehicles</span>
-            <span className="text-2xl font-extrabold text-white">{loading ? "..." : vehicles.length}</span>
+          <div className="flex-shrink-0 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20 text-center sm:text-right">
+            <span className="text-[10px] uppercase text-emerald-200 font-bold tracking-wider block">Available Vehicles</span>
+            <span className="text-2xl font-black text-white">{loading ? "..." : vehicles.length}</span>
           </div>
         </div>
       </div>
@@ -262,11 +261,11 @@ export const DashboardPage: React.FC = () => {
       {/* Results Header */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
             {isFiltered ? "Search Results" : "All Vehicles"}
           </h2>
           {isFiltered && (
-            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">
+            <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
               Filtering Active ({vehicles.length} found)
             </span>
           )}
@@ -277,15 +276,15 @@ export const DashboardPage: React.FC = () => {
 
         {/* Error Alert State */}
         {!loading && error && (
-          <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-6 rounded-xl shadow-sm">
+          <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-6 rounded-2xl shadow-xs">
             <div className="flex items-start">
               <div className="flex-shrink-0 text-red-500 text-xl">⚠️</div>
               <div className="ml-3 flex-1">
                 <h3 className="text-sm font-bold text-red-800">Search error occurred</h3>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
+                <p className="text-xs text-red-700 mt-1">{error}</p>
                 <button
                   onClick={() => executeSearch(currentFilters)}
-                  className="mt-3 text-xs font-semibold bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+                  className="mt-3 text-xs font-bold bg-red-600 text-white px-3.5 py-2 rounded-xl hover:bg-red-700 transition-colors cursor-pointer"
                 >
                   Retry Search
                 </button>
@@ -296,18 +295,18 @@ export const DashboardPage: React.FC = () => {
 
         {/* Empty Search Results State */}
         {!loading && !error && vehicles.length === 0 && (
-          <div className="min-h-[300px] flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100 p-8 shadow-sm text-center">
-            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl mb-4">
+          <div className="min-h-[300px] flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-200/80 p-8 shadow-xs text-center">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-4 border border-emerald-100 shadow-2xs">
               🚘
             </div>
-            <h3 className="text-lg font-bold text-gray-900">No Vehicles Found</h3>
-            <p className="text-sm text-gray-500 max-w-sm mt-1">
-              No vehicles matched your search filters. Try adjusting your make, model, or price criteria.
+            <h3 className="text-lg font-bold text-slate-900">No Vehicles Found</h3>
+            <p className="text-xs text-slate-500 max-w-sm mt-1 font-medium">
+              No vehicles matched your search criteria. Try adjusting your make, model, or price filters.
             </p>
             {isFiltered && (
               <button
                 onClick={handleResetFilters}
-                className="mt-4 text-xs font-semibold bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer"
+                className="mt-5 text-xs font-bold bg-emerald-600 text-white px-5 py-2.5 rounded-xl hover:bg-emerald-700 transition-all shadow-md cursor-pointer"
               >
                 Clear All Search Filters
               </button>
