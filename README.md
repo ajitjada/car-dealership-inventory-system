@@ -271,8 +271,6 @@ GET /api/purchases/me
 
 # Screenshots
 
-(Add screenshots here)
-
 ![Login Page](./frontend/public/images/Login.png)
 
 ![Register Page](./frontend/public/images/Register.png)
