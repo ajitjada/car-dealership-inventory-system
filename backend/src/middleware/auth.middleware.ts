@@ -43,3 +43,16 @@ export const authenticate = (
     });
   }
 };
+
+export const authorize = (...roles: string[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      res.status(403).json({
+        success: false,
+        message: "Access denied. Insufficient permissions.",
+      });
+      return;
+    }
+    next();
+  };
+};

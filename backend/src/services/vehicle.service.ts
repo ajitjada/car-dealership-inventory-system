@@ -144,4 +144,22 @@ export class VehicleService {
 
     return updatedVehicle;
   }
+
+  async deleteVehicle(id: string): Promise<IVehicle> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const vehicle = await Vehicle.findByIdAndDelete(id);
+
+    if (!vehicle) {
+      const error: any = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return vehicle;
+  }
 }
