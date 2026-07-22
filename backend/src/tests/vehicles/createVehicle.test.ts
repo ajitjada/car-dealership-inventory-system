@@ -21,17 +21,21 @@ describe("POST /api/vehicles", () => {
       role: "dealer",
     };
     authToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
-  });
+  }, 30000);
 
   afterAll(async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
-  });
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+  }, 30000);
 
   beforeEach(async () => {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-      await collections[key].deleteMany({});
+    if (mongoose.connection.readyState === 1) {
+      const collections = mongoose.connection.collections;
+      for (const key in collections) {
+        await collections[key].deleteMany({});
+      }
     }
   });
 

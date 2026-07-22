@@ -24,12 +24,14 @@ describe("JWT Authentication Middleware", () => {
 
     validToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
     expiredToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "-1s" });
-  });
+  }, 30000);
 
   afterAll(async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
-  });
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+  }, 30000);
 
   it("should allow access to protected route with a valid JWT token and return 200", async () => {
     const response = await request(app)

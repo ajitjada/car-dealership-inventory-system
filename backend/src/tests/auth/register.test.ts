@@ -10,17 +10,21 @@ describe("POST /api/auth/register", () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
-  });
+  }, 30000);
 
   afterAll(async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
-  });
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+  }, 30000);
 
   afterEach(async () => {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-      await collections[key].deleteMany({});
+    if (mongoose.connection.readyState === 1) {
+      const collections = mongoose.connection.collections;
+      for (const key in collections) {
+        await collections[key].deleteMany({});
+      }
     }
   });
 

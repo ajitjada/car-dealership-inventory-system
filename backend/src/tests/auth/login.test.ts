@@ -10,25 +10,29 @@ describe("POST /api/auth/login", () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
-  });
+  }, 30000);
 
   afterAll(async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
-  });
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+  }, 30000);
 
   beforeEach(async () => {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-      await collections[key].deleteMany({});
-    }
+    if (mongoose.connection.readyState === 1) {
+      const collections = mongoose.connection.collections;
+      for (const key in collections) {
+        await collections[key].deleteMany({});
+      }
 
-    // Register a registered user to test login scenarios
-    await request(app).post("/api/auth/register").send({
-      name: "Test User",
-      email: "user@example.com",
-      password: "Password123!",
-    });
+      // Register a registered user to test login scenarios
+      await request(app).post("/api/auth/register").send({
+        name: "Test User",
+        email: "user@example.com",
+        password: "Password123!",
+      });
+    }
   });
 
   it("should login successfully with valid email and password", async () => {
