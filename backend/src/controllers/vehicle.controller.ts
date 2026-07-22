@@ -46,4 +46,29 @@ export class VehicleController {
       });
     }
   }
+
+  async searchVehicles(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { make, model, category, minPrice, maxPrice } = req.query;
+      const vehicles = await vehicleService.searchVehicles({
+        make: make as string,
+        model: model as string,
+        category: category as string,
+        minPrice: minPrice as string,
+        maxPrice: maxPrice as string,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Search completed successfully",
+        data: vehicles,
+      });
+    } catch (error: any) {
+      const statusCode = error.statusCode || 500;
+      res.status(statusCode).json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
+    }
+  }
 }

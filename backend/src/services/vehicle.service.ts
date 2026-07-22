@@ -8,6 +8,14 @@ export interface CreateVehicleData {
   quantity?: number;
 }
 
+export interface VehicleSearchQuery {
+  make?: string;
+  model?: string;
+  category?: string;
+  minPrice?: string | number;
+  maxPrice?: string | number;
+}
+
 export class VehicleService {
   async createVehicle(data: CreateVehicleData): Promise<IVehicle> {
     const { make, model, category, price, quantity } = data;
@@ -54,5 +62,33 @@ export class VehicleService {
 
   async getAllVehicles(): Promise<IVehicle[]> {
     return await Vehicle.find();
+  }
+
+  async searchVehicles(query: VehicleSearchQuery): Promise<IVehicle[]> {
+    const filter: any = {};
+
+    if (query.make) {
+      filter.make = { $regex: new RegExp(query.make, "i") };
+    }
+
+    if (query.model) {
+      filter.model = { $regex: new RegExp(query.model, "i") };
+    }
+
+    if (query.category) {
+      filter.category = { $regex: new RegExp(query.category, "i") };
+    }
+
+    if (query.minPrice !== undefined || query.maxPrice !== undefined) {
+      filter.price = {};
+      if (query.minPrice !== undefined && query.minPrice !== "") {
+        filter.price.$gte = Number(query.minPrice);
+      }
+      if (query.maxPrice !== undefined && query.maxPrice !== "") {
+        filter.price.$lte = Number(query.maxPrice);
+      }
+    }
+
+    return await Vehicle.find(filter);
   }
 }

@@ -6,6 +6,7 @@ const router = Router();
 const vehicleController = new VehicleController();
 
 router.post("/", authenticate, (req, res) => vehicleController.createVehicle(req, res));
+router.get("/search", authenticate, (req, res) => vehicleController.searchVehicles(req, res));
 router.get("/", authenticate, (req, res) => vehicleController.getVehicles(req, res));
 
 export default router;
