@@ -1,18 +1,27 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Vehicle } from "../../types/vehicle.types";
+import { authService } from "../../services/auth.service";
 
 interface VehicleCardProps {
   vehicle: Vehicle;
   onPurchase?: (vehicleId: string) => void;
+  onRestock?: (vehicle: Vehicle) => void;
+  onDelete?: (vehicle: Vehicle) => void;
   isPurchasing?: boolean;
 }
 
 export const VehicleCard: React.FC<VehicleCardProps> = ({
   vehicle,
   onPurchase,
+  onRestock,
+  onDelete,
   isPurchasing = false,
 }) => {
   const vehicleId = vehicle._id || vehicle.id || "";
+  const currentUser = authService.getCurrentUser();
+  const isAdmin = currentUser?.role === "admin";
+
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -23,7 +32,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col justify-between group">
-      {/* Header / Category Badge */}
+      {/* Header / Category & Admin Action Badges */}
       <div className="p-5 pb-4">
         <div className="flex justify-between items-start mb-3">
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 uppercase tracking-wider">
@@ -49,7 +58,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
         )}
       </div>
 
-      {/* Footer / Price & Purchase Button */}
+      {/* Footer / Price & Action Controls */}
       <div className="px-5 py-4 bg-gray-50 border-t border-gray-100 space-y-3">
         <div className="flex items-center justify-between">
           <div>
@@ -61,8 +70,32 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           </div>
         </div>
 
-        {/* Purchase Action Button */}
-        {onPurchase && (
+        {/* Admin Management Toolbar */}
+        {isAdmin && (
+          <div className="pt-2 border-t border-gray-200/60 grid grid-cols-3 gap-2">
+            <Link
+              to={`/admin/vehicles/edit/${vehicleId}`}
+              className="py-1.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 rounded-lg text-xs font-semibold text-center transition-colors"
+            >
+              ✏️ Edit
+            </Link>
+            <button
+              onClick={() => onRestock && onRestock(vehicle)}
+              className="py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              📦 Restock
+            </button>
+            <button
+              onClick={() => onDelete && onDelete(vehicle)}
+              className="py-1.5 px-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/80 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              🗑️ Delete
+            </button>
+          </div>
+        )}
+
+        {/* Customer Purchase Action Button */}
+        {onPurchase && !isAdmin && (
           <button
             onClick={() => vehicleId && onPurchase(vehicleId)}
             disabled={isOutOfStock || isPurchasing}
@@ -96,7 +129,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                <span>Processing Purchase...</span>
+                <span>Processing...</span>
               </>
             ) : isOutOfStock ? (
               <span>Out of Stock</span>

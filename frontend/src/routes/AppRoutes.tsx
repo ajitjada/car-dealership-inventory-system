@@ -4,7 +4,9 @@ import { MainLayout } from "../components/layout/MainLayout";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { DashboardPage } from "../pages/dashboard/DashboardPage";
-import { ProtectedRoute, GuestRoute } from "../components/common/ProtectedRoute";
+import { AddVehiclePage } from "../pages/admin/AddVehiclePage";
+import { EditVehiclePage } from "../pages/admin/EditVehiclePage";
+import { ProtectedRoute, GuestRoute, AdminRoute } from "../components/common/ProtectedRoute";
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -20,9 +22,15 @@ export const AppRoutes: React.FC = () => {
             <Route path="register" element={<RegisterPage />} />
           </Route>
 
-          {/* Protected Routes (Only accessible when logged in) */}
+          {/* Protected User Routes (Accessible when logged in) */}
           <Route element={<ProtectedRoute />}>
             <Route path="dashboard" element={<DashboardPage />} />
+          </Route>
+
+          {/* Protected Admin Routes (Accessible ONLY when user.role === 'admin') */}
+          <Route element={<AdminRoute />}>
+            <Route path="admin/vehicles/new" element={<AddVehiclePage />} />
+            <Route path="admin/vehicles/edit/:id" element={<EditVehiclePage />} />
           </Route>
 
           {/* Fallback */}

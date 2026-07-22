@@ -31,4 +31,32 @@ export const vehicleService = {
     );
     return response.data.data;
   },
+
+  async createVehicle(data: Partial<Vehicle>): Promise<Vehicle> {
+    const response = await api.post<{ success: boolean; message: string; data: Vehicle }>(
+      "/vehicles",
+      data
+    );
+    return response.data.data;
+  },
+
+  async updateVehicle(id: string, data: Partial<Vehicle>): Promise<Vehicle> {
+    const response = await api.put<{ success: boolean; message: string; data: Vehicle }>(
+      `/vehicles/${id}`,
+      data
+    );
+    return response.data.data;
+  },
+
+  async deleteVehicle(id: string): Promise<void> {
+    await api.delete(`/vehicles/${id}`);
+  },
+
+  async restockVehicle(id: string, quantity: number): Promise<Vehicle> {
+    const response = await api.post<{ success: boolean; message: string; data: Vehicle }>(
+      `/vehicles/${id}/restock`,
+      { quantity }
+    );
+    return response.data.data;
+  },
 };

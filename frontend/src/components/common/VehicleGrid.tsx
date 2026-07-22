@@ -5,12 +5,16 @@ import { VehicleCard } from "./VehicleCard";
 interface VehicleGridProps {
   vehicles: Vehicle[];
   onPurchase?: (vehicleId: string) => void;
+  onRestock?: (vehicle: Vehicle) => void;
+  onDelete?: (vehicle: Vehicle) => void;
   purchasingId?: string | null;
 }
 
 export const VehicleGrid: React.FC<VehicleGridProps> = ({
   vehicles,
   onPurchase,
+  onRestock,
+  onDelete,
   purchasingId,
 }) => {
   return (
@@ -22,6 +26,8 @@ export const VehicleGrid: React.FC<VehicleGridProps> = ({
             key={vehicleId}
             vehicle={vehicle}
             onPurchase={onPurchase}
+            onRestock={onRestock}
+            onDelete={onDelete}
             isPurchasing={purchasingId === vehicleId}
           />
         );

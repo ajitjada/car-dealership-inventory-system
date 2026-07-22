@@ -21,3 +21,18 @@ export const GuestRoute: React.FC = () => {
 
   return <Outlet />;
 };
+
+export const AdminRoute: React.FC = () => {
+  const token = authService.getToken();
+  const user = authService.getCurrentUser();
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== "admin") {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Outlet />;
+};
