@@ -6,10 +6,19 @@ import { SearchBar } from "../../components/common/SearchBar";
 import { FilterPanel } from "../../components/common/FilterPanel";
 import { authService } from "../../services/auth.service";
 
+interface ToastNotification {
+  message: string;
+  type: "success" | "error";
+}
+
 export const DashboardPage: React.FC = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Purchase State
+  const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastNotification | null>(null);
 
   // Search & Filter State
   const [make, setMake] = useState<string>("");
@@ -20,13 +29,11 @@ export const DashboardPage: React.FC = () => {
 
   const user = authService.getCurrentUser();
 
-  // Known categories for dropdown selection
   const availableCategories = useMemo(() => {
     const categoriesSet = new Set<string>();
     vehicles.forEach((v) => {
       if (v.category) categoriesSet.add(v.category);
     });
-    // Add default common categories if inventory is empty/filtered
     ["Sedan", "SUV", "Truck", "Coupe", "Convertible", "Hatchback"].forEach((c) =>
       categoriesSet.add(c)
     );
@@ -48,17 +55,47 @@ export const DashboardPage: React.FC = () => {
     }
   }, []);
 
-  // Effect to trigger search when category or price filters change
-  useEffect(() => {
-    const filters: VehicleSearchFilters = {
+  const currentFilters = useMemo(
+    (): VehicleSearchFilters => ({
       make: make.trim() || undefined,
       model: model.trim() || undefined,
       category: category || undefined,
       minPrice: minPrice !== "" ? minPrice : undefined,
       maxPrice: maxPrice !== "" ? maxPrice : undefined,
-    };
-    executeSearch(filters);
-  }, [make, model, category, minPrice, maxPrice, executeSearch]);
+    }),
+    [make, model, category, minPrice, maxPrice]
+  );
+
+  useEffect(() => {
+    executeSearch(currentFilters);
+  }, [currentFilters, executeSearch]);
+
+  const handlePurchase = async (vehicleId: string) => {
+    const targetVehicle = vehicles.find((v) => (v._id || v.id) === vehicleId);
+    const vehicleName = targetVehicle ? `${targetVehicle.make} ${targetVehicle.model}` : "Vehicle";
+
+    setPurchasingId(vehicleId);
+    setToast(null);
+
+    try {
+      await vehicleService.purchaseVehicle(vehicleId);
+      setToast({
+        message: `Successfully purchased ${vehicleName}! Quantity updated.`,
+        type: "success",
+      });
+      // Refresh vehicle list after successful purchase
+      await executeSearch(currentFilters);
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message || err.message || `Failed to purchase ${vehicleName}`;
+      setToast({
+        message,
+        type: "error",
+      });
+    } finally {
+      setPurchasingId(null);
+    }
+  };
 
   const handleSearchChange = useCallback((newMake: string, newModel: string) => {
     setMake(newMake);
@@ -87,6 +124,28 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* Toast Notification Banner */}
+      {toast && (
+        <div
+          className={`p-4 rounded-xl shadow-md border flex items-center justify-between transition-all ${
+            toast.type === "success"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : "bg-red-50 border-red-200 text-red-800"
+          }`}
+        >
+          <div className="flex items-center space-x-3">
+            <span className="text-xl">{toast.type === "success" ? "🎉" : "⚠️"}</span>
+            <span className="text-sm font-semibold">{toast.message}</span>
+          </div>
+          <button
+            onClick={() => setToast(null)}
+            className="text-xs font-bold text-gray-500 hover:text-gray-800 p-1 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Welcome Hero Banner */}
       <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -94,11 +153,11 @@ export const DashboardPage: React.FC = () => {
             Welcome back, {user?.name || user?.email || "User"}!
           </h1>
           <p className="mt-2 text-indigo-100 text-sm sm:text-base max-w-xl">
-            Search dealership inventory by make or model, filter by price range or category.
+            Browse inventory, purchase available vehicles, and manage your vehicle stock levels.
           </p>
         </div>
         <div className="flex-shrink-0 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-center sm:text-right">
-          <span className="text-xs uppercase text-indigo-200 tracking-wider block">Matching Vehicles</span>
+          <span className="text-xs uppercase text-indigo-200 tracking-wider block">Available Vehicles</span>
           <span className="text-2xl font-extrabold text-white">{loading ? "..." : vehicles.length}</span>
         </div>
       </div>
@@ -133,7 +192,7 @@ export const DashboardPage: React.FC = () => {
         {loading && (
           <div className="min-h-[300px] flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-            <p className="mt-4 text-sm font-medium text-gray-500">Searching inventory...</p>
+            <p className="mt-4 text-sm font-medium text-gray-500">Updating inventory...</p>
           </div>
         )}
 
@@ -146,7 +205,7 @@ export const DashboardPage: React.FC = () => {
                 <h3 className="text-sm font-bold text-red-800">Search error occurred</h3>
                 <p className="text-sm text-red-700 mt-1">{error}</p>
                 <button
-                  onClick={() => executeSearch({ make, model, category, minPrice, maxPrice })}
+                  onClick={() => executeSearch(currentFilters)}
                   className="mt-3 text-xs font-semibold bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
                 >
                   Retry Search
@@ -160,7 +219,7 @@ export const DashboardPage: React.FC = () => {
         {!loading && !error && vehicles.length === 0 && (
           <div className="min-h-[300px] flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-100 p-8 shadow-sm text-center">
             <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl mb-4">
-              🔍
+              🚘
             </div>
             <h3 className="text-lg font-bold text-gray-900">No Vehicles Found</h3>
             <p className="text-sm text-gray-500 max-w-sm mt-1">
@@ -179,7 +238,11 @@ export const DashboardPage: React.FC = () => {
 
         {/* Vehicle Grid */}
         {!loading && !error && vehicles.length > 0 && (
-          <VehicleGrid vehicles={vehicles} />
+          <VehicleGrid
+            vehicles={vehicles}
+            onPurchase={handlePurchase}
+            purchasingId={purchasingId}
+          />
         )}
       </div>
     </div>

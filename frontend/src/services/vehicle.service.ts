@@ -24,4 +24,11 @@ export const vehicleService = {
     const response = await api.get<VehicleResponse>(endpoint);
     return response.data.data;
   },
+
+  async purchaseVehicle(id: string): Promise<Vehicle> {
+    const response = await api.post<{ success: boolean; message: string; data: Vehicle }>(
+      `/vehicles/${id}/purchase`
+    );
+    return response.data.data;
+  },
 };
