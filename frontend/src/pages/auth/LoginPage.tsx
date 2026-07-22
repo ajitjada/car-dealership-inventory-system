@@ -1,26 +1,34 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
-
-export interface LoginFormInputs {
-  email: string;
-  password: string;
-}
+import { Link, useNavigate } from "react-router-dom";
+import { authService } from "../../services/auth.service";
+import { LoginPayload } from "../../types/auth.types";
 
 export const LoginPage: React.FC = () => {
   const [apiError, setApiError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormInputs>();
+  } = useForm<LoginPayload>();
 
-  const onSubmit = async (data: LoginFormInputs) => {
+  const onSubmit = async (data: LoginPayload) => {
     setApiError(null);
-    console.log("Login form submitted:", data);
-    // Simulated UI loading state (No backend connection)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await authService.login(data);
+      if (response.success && response.token) {
+        authService.setAuthSession(response.token, response.data);
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "An unexpected error occurred during login";
+      setApiError(message);
+    }
   };
 
   return (
@@ -51,7 +59,7 @@ export const LoginPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Error Message Placeholder Banner */}
+        {/* Backend Error Message Alert */}
         {apiError && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
             <div className="flex items-center">
@@ -61,7 +69,7 @@ export const LoginPage: React.FC = () => {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-700">{apiError}</p>
+                <p className="text-sm font-medium text-red-700">{apiError}</p>
               </div>
             </div>
           </div>

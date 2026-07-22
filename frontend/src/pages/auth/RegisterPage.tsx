@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { authService } from "../../services/auth.service";
+import { RegisterPayload } from "../../types/auth.types";
 
-export interface RegisterFormInputs {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
+export interface RegisterFormInputs extends RegisterPayload {
+  confirmPassword?: string;
 }
 
 export const RegisterPage: React.FC = () => {
   const [apiError, setApiError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -23,9 +23,20 @@ export const RegisterPage: React.FC = () => {
 
   const onSubmit = async (data: RegisterFormInputs) => {
     setApiError(null);
-    console.log("Register form submitted:", data);
-    // Simulated UI loading state (No backend connection)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const { confirmPassword, ...registerData } = data;
+      const response = await authService.register(registerData);
+      if (response.success && response.token) {
+        authService.setAuthSession(response.token, response.data);
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "An unexpected error occurred during registration";
+      setApiError(message);
+    }
   };
 
   return (
@@ -56,7 +67,7 @@ export const RegisterPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Error Message Placeholder Banner */}
+        {/* Backend Error Message Alert */}
         {apiError && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
             <div className="flex items-center">
@@ -66,7 +77,7 @@ export const RegisterPage: React.FC = () => {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-700">{apiError}</p>
+                <p className="text-sm font-medium text-red-700">{apiError}</p>
               </div>
             </div>
           </div>
