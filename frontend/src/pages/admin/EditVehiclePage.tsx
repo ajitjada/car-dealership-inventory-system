@@ -229,11 +229,10 @@ export const EditVehiclePage: React.FC = () => {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
-                isDragOver
+              className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${isDragOver
                   ? "border-emerald-500 bg-emerald-50/50 scale-[1.01]"
                   : "border-slate-300 hover:border-emerald-400 bg-slate-50/50"
-              }`}
+                }`}
             >
               <input
                 id="edit-vehicle-images-input"
@@ -344,9 +343,8 @@ export const EditVehiclePage: React.FC = () => {
                 id="make"
                 type="text"
                 {...register("make", { required: "Vehicle make is required" })}
-                className={`w-full px-3 py-2.5 border ${
-                  errors.make ? "border-red-500" : "border-slate-300"
-                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
+                className={`w-full px-3 py-2.5 border ${errors.make ? "border-red-500" : "border-slate-300"
+                  } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
               />
               {errors.make && <p className="text-xs text-red-600 mt-1 font-medium">{errors.make.message}</p>}
             </div>
@@ -360,9 +358,8 @@ export const EditVehiclePage: React.FC = () => {
                 id="model"
                 type="text"
                 {...register("model", { required: "Vehicle model is required" })}
-                className={`w-full px-3 py-2.5 border ${
-                  errors.model ? "border-red-500" : "border-slate-300"
-                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
+                className={`w-full px-3 py-2.5 border ${errors.model ? "border-red-500" : "border-slate-300"
+                  } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
               />
               {errors.model && <p className="text-xs text-red-600 mt-1 font-medium">{errors.model.message}</p>}
             </div>
@@ -375,9 +372,8 @@ export const EditVehiclePage: React.FC = () => {
               <select
                 id="category"
                 {...register("category", { required: "Category is required" })}
-                className={`w-full px-3 py-2.5 border ${
-                  errors.category ? "border-red-500" : "border-slate-300"
-                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white shadow-2xs`}
+                className={`w-full px-3 py-2.5 border ${errors.category ? "border-red-500" : "border-slate-300"
+                  } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white shadow-2xs`}
               >
                 <option value="Sedan">Sedan</option>
                 <option value="SUV">SUV</option>
@@ -418,9 +414,8 @@ export const EditVehiclePage: React.FC = () => {
                   required: "Price is required",
                   min: { value: 1, message: "Price must be greater than 0" },
                 })}
-                className={`w-full px-3 py-2.5 border ${
-                  errors.price ? "border-red-500" : "border-slate-300"
-                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
+                className={`w-full px-3 py-2.5 border ${errors.price ? "border-red-500" : "border-slate-300"
+                  } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
               />
               {errors.price && <p className="text-xs text-red-600 mt-1 font-medium">{errors.price.message}</p>}
             </div>
@@ -437,9 +432,8 @@ export const EditVehiclePage: React.FC = () => {
                   required: "Quantity is required",
                   min: { value: 0, message: "Quantity cannot be negative" },
                 })}
-                className={`w-full px-3 py-2.5 border ${
-                  errors.quantity ? "border-red-500" : "border-slate-300"
-                } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
+                className={`w-full px-3 py-2.5 border ${errors.quantity ? "border-red-500" : "border-slate-300"
+                  } rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-2xs`}
               />
               {errors.quantity && <p className="text-xs text-red-600 mt-1 font-medium">{errors.quantity.message}</p>}
             </div>
