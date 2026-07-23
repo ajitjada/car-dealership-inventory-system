@@ -99,7 +99,7 @@ export const VehicleDetailsModal: React.FC<VehicleDetailsModalProps> = ({
                 <button
                   key={idx}
                   onClick={() => setSelectedImageIndex(idx)}
-                  className={`w-20 h-16 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer ${
+                  className={`w-20 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                     selectedImageIndex === idx
                       ? "border-emerald-600 ring-2 ring-emerald-500/20 shadow-md scale-105"
                       : "border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-300"

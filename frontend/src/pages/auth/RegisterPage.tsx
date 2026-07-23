@@ -71,7 +71,7 @@ export const RegisterPage: React.FC = () => {
         {apiError && (
           <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-xs">
             <div className="flex items-center">
-              <div className="flex-shrink-0 text-red-500 text-lg">⚠️</div>
+              <div className="shrink-0 text-red-500 text-lg">⚠️</div>
               <div className="ml-3">
                 <p className="text-xs font-semibold text-red-800">{apiError}</p>
               </div>
@@ -195,7 +195,7 @@ export const RegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-all cursor-pointer"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-xs font-bold text-white bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-all cursor-pointer"
             >
               {isSubmitting ? (
                 <span className="flex items-center">

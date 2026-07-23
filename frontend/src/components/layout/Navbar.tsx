@@ -33,7 +33,7 @@ export const Navbar: React.FC = () => {
         {/* App Logo & Title */}
         <div className="flex items-center space-x-8">
           <Link to="/dashboard" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform text-lg">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform text-lg">
               🚗
             </div>
             <div>
@@ -129,7 +129,7 @@ export const Navbar: React.FC = () => {
             </Link>
             <Link
               to="/register"
-              className="text-xs font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all"
+              className="text-xs font-semibold text-white bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all"
             >
               Register
             </Link>

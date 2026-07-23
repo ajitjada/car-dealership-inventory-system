@@ -38,7 +38,7 @@ export const MyPurchasesPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-linear-to-r from-emerald-600 via-teal-700 to-emerald-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
             My Purchase History
@@ -47,7 +47,7 @@ export const MyPurchasesPage: React.FC = () => {
             View your order history, purchased vehicle details, and transaction receipts.
           </p>
         </div>
-        <div className="flex-shrink-0 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20 text-center sm:text-right">
+        <div className="shrink-0 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20 text-center sm:text-right">
           <span className="text-[10px] uppercase text-emerald-200 font-bold tracking-wider block">Total Orders</span>
           <span className="text-2xl font-black text-white">{loading ? "..." : purchases.length}</span>
         </div>
@@ -78,7 +78,7 @@ export const MyPurchasesPage: React.FC = () => {
         {!loading && error && (
           <div role="alert" className="bg-red-50 border-l-4 border-red-500 p-6 rounded-2xl shadow-xs">
             <div className="flex items-start">
-              <div className="flex-shrink-0 text-red-500 text-xl">⚠️</div>
+              <div className="shrink-0 text-red-500 text-xl">⚠️</div>
               <div className="ml-3 flex-1">
                 <h3 className="text-sm font-bold text-red-800">Unable to load purchase history</h3>
                 <p className="text-xs text-red-700 mt-1">{error}</p>
@@ -95,7 +95,7 @@ export const MyPurchasesPage: React.FC = () => {
 
         {/* Empty State */}
         {!loading && !error && purchases.length === 0 && (
-          <div className="min-h-[320px] flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-200/80 p-8 shadow-xs text-center">
+          <div className="min-h-80 flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-200/80 p-8 shadow-xs text-center">
             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-4 border border-emerald-100 shadow-2xs">
               🛍️
             </div>

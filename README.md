@@ -271,19 +271,35 @@ GET /api/purchases/me
 
 # Screenshots
 
+## Login Page
+
 ![Login Page](./frontend/public/images/Login.png)
+
+## Register Page
 
 ![Register Page](./frontend/public/images/Register.png)
 
+## Admin Dashboard
+
 ![Admin Dashboard](./frontend/public/images/dashboard.png)
+
+## Vehicle List
 
 ![Vehicle List](./frontend/public/images/VehicleList.png)
 
+## Purchase History
+
 ![Purchase History](./frontend/public/images/PurchaseHistory.png)
+
+## Vehicle Gallery
 
 ![Vehicle Gallery](./frontend/public/images/VehicleGallery.png)
 
+## Add Vehicle
+
 ![Add Vehicle](./frontend/public/images/addvehicle.png)
+
+## Customer Dashboard
 
 ![Customer Dashboard](./frontend/public/images/CustomerDashboard.png)
 
